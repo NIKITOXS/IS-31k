@@ -45,5 +45,29 @@ def clear_tasks():
     save_tasks(tasks)
     return redirect('/')
 
+@app.route('/edit/<int:task_id>', methods=['GET', 'POST'])
+def edit_task(task_id):
+    if task_id < 0 or task_id >= len(tasks):
+        return "Задача не найдена", 404
+
+    task = tasks[task_id]
+
+    if request.method == 'POST':
+        new_text = request.form.get('task', '').strip()
+        old_text = task['text']
+        
+        # Проверка на пустое поле
+        if new_text == '':
+            return render_template('edit.html', task=task, message="Текст не может быть пустым!")
+        
+        # Проверка на совпадение текста (самостоятельное задание)
+        if new_text == old_text:
+            return render_template('edit.html', task=task, message="Ничего не изменено")
+
+        tasks[task_id]['text'] = new_text
+        save_tasks(tasks)
+        return redirect('/')
+
+    return render_template('edit.html', task=task)
 if __name__ == '__main__':
     app.run(debug=True)
